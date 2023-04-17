@@ -4,6 +4,14 @@
              xmlns:local="clr-namespace:FtpAssistant"
              StartupUri="Assistant.xaml">
     <Application.Resources>
-         
+
+
+
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Core/Resource/default.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

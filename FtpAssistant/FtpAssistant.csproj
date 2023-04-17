@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Resource\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Resource Include="Assets\img\favicon-32x32.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

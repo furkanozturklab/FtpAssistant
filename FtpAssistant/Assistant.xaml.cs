@@ -30,6 +30,11 @@ namespace FtpAssistant
         public Assistant()
         {
             InitializeComponent();
+
+            app_ftpserver.Text = App.config.AppSettings.Settings["app_ftpserver"].Value;
+            app_username.Text = App.config.AppSettings.Settings["app_username"].Value;
+            app_psw.Text = App.config.AppSettings.Settings["app_psw"].Value;
+            app_locationUrl.Text = App.config.AppSettings.Settings["app_locationUrl"].Value;
         }
 
 
@@ -63,9 +68,9 @@ namespace FtpAssistant
                 }
 
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -151,52 +156,58 @@ namespace FtpAssistant
 
 
                 // Bağlandığımız FTP sunucusundaki konumla ilgili dosyaları alıyorum
-                FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-                Stream responseStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(responseStream);
 
 
 
-                // Yanıtı okuyarak dosya ve klasör listesini elde ediyorum
-                string directoryListing = reader.ReadToEnd();
-                string[] lines = directoryListing.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                List<string> fileNames = new List<string>();
-                List<string> folderNames = new List<string>();
-
-                // Daha önceki bağlantıdan kalan verileri siliyorum
-                this.Dispatcher.Invoke(() => directoryListView.Items.Clear());
-
-                // Tipe göre dönerek yerleştiriyorum 
-                foreach (string line in lines)
+                using (FtpWebResponse response = (FtpWebResponse)await request.GetResponseAsync())
                 {
-                    string[] parts = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    string fileType = parts[0];
-                    string fileName = parts[parts.Length - 1];
+                    using (Stream responseStream = response.GetResponseStream())
+                    {
+                        StreamReader reader = new StreamReader(responseStream);
+                        // Yanıtı okuyarak dosya ve klasör listesini elde ediyorum
+                        string directoryListing = reader.ReadToEnd();
+                        string[] lines = directoryListing.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                        List<string> fileNames = new List<string>();
+                        List<string> folderNames = new List<string>();
 
-                    // Dosya veya klasör olarak ayrıştırma
-                    if (fileType.StartsWith("d"))
-                    {
-                        // Klasör
-                        this.Dispatcher.Invoke(() => directoryListView.Items.Add($"Folder: {fileName}"));
+                        // Daha önceki bağlantıdan kalan verileri siliyorum
+                        this.Dispatcher.Invoke(() => directoryListView.Items.Clear());
+
+                        // Tipe göre dönerek yerleştiriyorum 
+                        foreach (string line in lines)
+                        {
+                            string[] parts = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            string fileType = parts[0];
+                            string fileName = parts[parts.Length - 1];
+
+                            // Dosya veya klasör olarak ayrıştırma
+                            if (fileType.StartsWith("d"))
+                            {
+                                // Klasör
+                                Debug.WriteLine("eKLEDİM");
+                                this.Dispatcher.Invoke(() => directoryListView.Items.Add($"Folder: {fileName}"));
+                            }
+                            else
+                            {
+                                // Dosya
+                                this.Dispatcher.Invoke(() => directoryListView.Items.Add($"File: {fileName}"));
+                            }
+                        }
+
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            if (app_locationUrl.Text.Length > 0) backFtpFolder.IsEnabled = true;
+                            else backFtpFolder.IsEnabled = false;
+                        });
+
+                        ftpConnection = true;
                     }
-                    else
-                    {
-                        // Dosya
-                        this.Dispatcher.Invoke(() => directoryListView.Items.Add($"File: {fileName}"));
-                    }
+
                 }
-
-                this.Dispatcher.Invoke(() =>
-                {
-                    if (app_locationUrl.Text.Length > 0) backFtpFolder.IsEnabled = true;
-                    else backFtpFolder.IsEnabled = false;
-                });
-
-                ftpConnection = true;
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
 
 
@@ -231,10 +242,9 @@ namespace FtpAssistant
                 watcher.Dispose();
                 autoUpdateBtn.IsEnabled = true;
             }
-            catch
+            catch (Exception ex)
             {
-
-
+                MessageBox.Show(ex.Message);
             }
 
 
@@ -280,7 +290,7 @@ namespace FtpAssistant
             }
             catch (WebException ex)
             {
-                Debug.WriteLine("Hata: " + ex.Message);
+                MessageBox.Show(ex.Message);
             }
 
 
@@ -370,9 +380,9 @@ namespace FtpAssistant
                 ftpConnect();
                 MessageBox.Show($"{fileName} adlı dosya başarılı bir sekilde silindi.");
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
 
 
@@ -406,7 +416,7 @@ namespace FtpAssistant
 
                     var btntemp = new Button();
                     btntemp.Click += fileSelected_Click;
-                    btntemp.Style = (Style)FindResource("defaultButton");
+                    btntemp.Style = (Style)FindResource("fileButtonDefult");
 
                     btntemp.Content = file.Name;
                     btntemp.Uid = files.Count.ToString();
@@ -417,9 +427,9 @@ namespace FtpAssistant
 
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
 
 
@@ -452,10 +462,9 @@ namespace FtpAssistant
                 app_locationUrl.Text = app_locationUrl.Text.Replace(lastLocation[totalC] + '/', "");
                 ftpConnect();
             }
-            catch
+            catch (Exception ex)
             {
-
-
+                MessageBox.Show(ex.Message);
             }
 
 
@@ -480,9 +489,9 @@ namespace FtpAssistant
 
 
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
 
 
@@ -507,9 +516,9 @@ namespace FtpAssistant
                 await other;
                 other.Dispose();
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
 
         }
@@ -533,28 +542,36 @@ namespace FtpAssistant
                 resetButton.IsEnabled = true;
                 totalChangeCountText.Text = totalChange.ToString();
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
 
         }
 
         private void directoryListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            object selectedItem = directoryListView.SelectedItem;
-
-            // Seçili öğeyi MessageBox ile göster
-            if (selectedItem?.ToString().Split(':')[0].ToString() == "Folder")
+            try
             {
+                object selectedItem = directoryListView.SelectedItem;
 
-                app_locationUrl.Text += selectedItem?.ToString().Split(": ")[1].ToString() + "/";
-                ftpConnect();
+                // Seçili öğeyi MessageBox ile göster
+                if (selectedItem?.ToString().Split(':')[0].ToString() == "Folder")
+                {
+
+                    app_locationUrl.Text += selectedItem?.ToString().Split(": ")[1].ToString() + "/";
+                    ftpConnect();
+                }
+                else
+                {
+                    MessageBox.Show("Dosya secildi...");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Dosya secildi...");
+                MessageBox.Show(ex.Message);
             }
+
         }
 
 
@@ -589,9 +606,9 @@ namespace FtpAssistant
                 }
 
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message);
             }
 
 
