@@ -1,0 +1,206 @@
+﻿<Window x:Class="FtpAssistant.Assistant"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FtpAssistant"
+        mc:Ignorable="d"
+        Title="Ftp Assistant" Height="550" Width="1000" ResizeMode="NoResize" Icon="/Assets/img/favicon.ico">
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+
+        <!-- Genel Dosya seçme işlemlerini yaptığım panel -->
+        <StackPanel Grid.Column="0" Orientation="Vertical" Name="leftStackPanel">
+            <Border Padding="10">
+                <Button Content="Dosya Seç" Name="fileOpen" Click="fileOpen_Click" Padding="10 5"/>
+            </Border>
+            <Border Padding="5 10">
+                <GroupBox x:Name="fileButtons" Header="Attached files" Grid.Column="0" Height="450">
+                    <StackPanel>
+                        <ScrollViewer Height="390">
+                            <StackPanel Orientation="Vertical" Name="fileStack">
+
+                            </StackPanel>
+                        </ScrollViewer>
+                        <StackPanel Margin="0 5" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="Attached File : "/>
+                            <TextBlock Name="totalfile" Text="0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </Border>
+        </StackPanel>
+
+
+
+        <StackPanel Grid.Column="1" Name="rightStackPanel">
+
+            <!-- Genel Kontrol Buttonları -->
+            <Border Padding="10">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+
+
+                    <!-- Ftp server ile bağlantıyı başlatan button -->
+                    <Button Content="Ftp Setter" Margin="10 5" Padding="10 5" IsEnabled="True" Name="ftpConnectBtn"  Click="ftpConnect_Click"/>
+
+                    <!-- Dosya değişiklerini izlemeye başlama butonu -->
+                    <Button Content="Auto update" Margin="10 5" Padding="10 5" IsEnabled="false" Name="autoUpdateBtn" Click="autoUpdateBtn_Click"/>
+
+                    <!-- Dosya üzerindeki izleme işlemlerini iptal eden buton-->
+                    <Button Content="Watch Stop" Margin="10 5"  Padding="10 5" IsEnabled="false" Name="watchStop" Click="watchStop_Click"/>
+
+                    <!-- Seçili Dosyayı sıfırlama ve yeni dosya secmemizi sağlayacak buton -->
+                    <Button Content="Closed File" Margin="10 5" Padding="10 5" IsEnabled="false" Name="resetButton" Click="resetButton_Click" />
+
+                </StackPanel>
+            </Border>
+
+            <Border Padding="10">
+                <Grid Height="440px">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="350"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox x:Name="ftpGroup" Header="Ftp Settings" Grid.Column="0">
+
+                        <StackPanel>
+
+                            <!-- Ftp bağlantısı için gerekli bilgirin olduğu inputlar -->
+                            <Label>Ftp server:</Label>
+                            <TextBox Height="24px" Padding="2" Name="app_ftpserver"></TextBox>
+
+                            <Label>User Name:</Label>
+                            <TextBox Height="24px" Padding="2" Name="app_username"></TextBox>
+
+                            <Label>Password:</Label>
+                            <TextBox Height="24px" Padding="2" Name="app_psw"></TextBox>
+
+                            <Label>Location to Connect:</Label>
+                            <TextBox Height="24px" Padding="2" Name="app_locationUrl"></TextBox>
+
+                            <StackPanel Orientation="Vertical">
+                                <Label>Connect Status:</Label>
+                                <TextBlock TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Name="ftpResponse">Wait</TextBlock>
+                            </StackPanel>
+
+
+                            <!-- Bağlantı için ipucuları -->
+                            <Label Content="Clue:"/>
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                <TextBlock Padding="2" Text="ftp://ftpserver.com/[LocationConnect]" />
+                                <TextBlock Padding="2" Text="FtpServer: ftp://ftpserver.com/"/>
+                                <TextBlock Padding="2" Text="Location to Connect:: public"/>
+                                <TextBlock Padding="2" Text="Url to render as result: ftp://ftpserver.com/public"/>
+                                <TextBlock Padding="2" TextWrapping="Wrap" Text="Set your directory as root when creating your ftp accounts"/>
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+
+                    </GroupBox>
+
+                    <Grid Grid.Column="1">
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="100"/>
+                            <RowDefinition Height="100"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Ftp bağlantısı sağlandığında bağlantı yapılan alanı gösterir -->
+                        <GroupBox x:Name="ftpDirectoryGroup" Header="Ftp Directory" Grid.Row="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="30"/>
+                                </Grid.RowDefinitions>
+                                <ListView x:Name="directoryListView" Grid.Row="0" Margin="10" MouseDoubleClick="directoryListView_MouseDoubleClick" SelectionChanged="directoryListView_SelectionChanged" />
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                                    <Button Content="Geri" Padding="25 0" Margin="15 0" Name="backFtpFolder" IsEnabled="false" Click="backFtpFolder_Click"/>
+                                    <Button Content="Sil" Padding="25 0" Margin="15 0" Name="deleteFtp" IsEnabled="false" Click="deleteFtp_Click"/>
+                                    <Button Content="İndir" Padding="25 0" Margin="15 0" Name="downloadFtp" IsEnabled="False" Click="downloadFtp_Click"  />
+                                    <Button Content="Gir" Padding="25 0" Margin="15 0" Name="openFolderFtp" IsEnabled="false" Click="openFolderFtp_Click" />
+
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- İzlenen dosyanını verilerini gösteriri  -->
+                        <GroupBox x:Name="fileGroup" Header="File Status" Grid.Row="1">
+
+                            <StackPanel Margin="5">
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="File Name : "/>
+                                    <TextBlock x:Name="selectedFileNameText" Text=""/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="File Path : "/>
+                                    <TextBlock x:Name="selectedFilePathText" Text=""/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="File Old Size : "/>
+                                    <TextBlock x:Name="selectedFileSizeText" Text=""/>
+                                </StackPanel>
+
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="File New Size : "/>
+                                    <TextBlock x:Name="selectedFileNewSizeText" Text=""/>
+                                </StackPanel>
+
+
+                            </StackPanel>
+                        </GroupBox>
+
+
+                        <!-- İzleme aşamasında yapılan işlemleri ile ilgili verileri gösterir -->
+                        <GroupBox Grid.Row="2" Header="Change Status">
+
+                            <StackPanel Margin="5">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Total Change Count : "/>
+                                    <TextBlock x:Name="totalChangeCountText" Text="0"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Last Change : "/>
+                                    <TextBlock x:Name="lastChangeText" Text="Wait"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Result : "/>
+                                    <TextBlock x:Name="resultText" Text="Wait"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Processing Time : "/>
+                                    <TextBlock x:Name="processingTime" Text="0ms"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                        </GroupBox>
+
+                    </Grid>
+
+
+                </Grid>
+
+            </Border>
+
+
+
+        </StackPanel>
+
+
+    </Grid>
+</Window>
